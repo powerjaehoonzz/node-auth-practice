@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/web-n/Nodejs#readme",
   "dependencies": {
+    "cookie": "^1.1.1",
     "sanitize-html": "^1.18.2"
   }
 }
