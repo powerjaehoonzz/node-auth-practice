@@ -1,13 +1,10 @@
-var http = require("http");
-var cookie = require("cookie");
+const http = require("http");
+const cookie = require("cookie");
 
 http
   .createServer(function (req, res) {
     console.log(req.headers.cookie);
-    var cookies = {};
-    if (req.headers.cookie !== undefined) {
-      cookies = cookie.parse(req.headers.cookie);
-    }
+    const cookies = cookie.parse(req.headers.cookie ?? "");
     console.log(cookies.yummy_cookie);
     res.writeHead(200, {
       "Set-Cookie": [
