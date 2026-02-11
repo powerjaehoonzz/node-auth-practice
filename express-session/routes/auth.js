@@ -36,7 +36,11 @@ router.post("/login_process", (req, res) => {
   if (email !== authData.email || password !== authData.password) {
     return res.send("Login Failed!!");
   }
-  res.redirect(`/`);
+  req.session.is_logined = true;
+  req.session.nickname = authData.nickname;
+  req.session.save(() => {
+    res.redirect(`/`);
+  });
 });
 
 router.get("/update/:pageId", (req, res) => {
