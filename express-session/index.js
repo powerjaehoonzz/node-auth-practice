@@ -1,39 +1,38 @@
-var express = require("express");
-var parseurl = require("parseurl");
-var session = require("express-session");
+const express = require("express");
+const app = express();
+const fs = require("fs");
+const bodyParser = require("body-parser");
+const compression = require("compression");
+const topicRouter = require("./routes/topic");
+const indexRouter = require("./routes/index");
+const authRouter = require("./routes/auth");
+const helmet = require("helmet");
+app.use(helmet());
 
-var app = express();
-
-app.use(
-  session({
-    secret: "keyboard cat",
-    resave: false,
-    saveUninitialized: true,
-  }),
-);
-
-app.use(function (req, res, next) {
-  if (!req.session.views) {
-    req.session.views = {};
-  }
-
-  // get the url pathname
-  var pathname = parseurl(req).pathname;
-
-  // count the views
-  req.session.views[pathname] = (req.session.views[pathname] || 0) + 1;
-
-  next();
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(compression());
+app.use((req, res, next) => {
+  fs.readdir("./data", (err, fileList) => {
+    if (err) {
+      return next(err);
+    }
+    req.list = fileList;
+    next();
+  });
 });
 
-app.get("/foo", function (req, res, next) {
-  res.send("you viewed this page " + req.session.views["/foo"] + " times");
+app.use("/", indexRouter);
+app.use("/topic", topicRouter);
+app.use("/auth", authRouter);
+
+app.use((req, res, next) => {
+  res.status(404).send("404 Not Found");
 });
 
-app.get("/bar", function (req, res, next) {
-  res.send("you viewed this page " + req.session.views["/bar"] + " times");
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send("500 Error");
 });
 
-app.listen(3000, function () {
-  console.log("3000!");
-});
+app.listen(3000, () => console.log("Example app listening on port 3000!"));
