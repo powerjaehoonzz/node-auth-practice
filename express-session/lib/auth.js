@@ -10,6 +10,12 @@ const auth = {
     }
     return authStatusUI;
   },
+  requireAuth: (req, res, next) => {
+    if (!auth.isOwner(req)) {
+      return res.redirect("/");
+    }
+    next();
+  },
 };
 
 module.exports = auth;

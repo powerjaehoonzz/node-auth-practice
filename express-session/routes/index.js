@@ -4,8 +4,6 @@ const template = require("../lib/template");
 const auth = require("../lib/auth");
 
 router.get("/", (req, res) => {
-  console.log(req.session);
-
   const title = "Welcome";
   const description = "Hello, Node.js";
   const list = template.list(req.list);
@@ -16,6 +14,7 @@ router.get("/", (req, res) => {
     `<a href="/topic/create">create</a>`,
     auth.statusUI(req),
   );
+  console.log(req.sessionID);
   res.send(html);
 });
 
