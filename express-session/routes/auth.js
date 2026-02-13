@@ -43,6 +43,28 @@ router.post("/login_process", (req, res) => {
   });
 });
 
+router.get("/register", (req, res) => {
+  const title = "WEB - Register";
+  const list = template.list(req.list);
+  const html = template.HTML(
+    title,
+    list,
+    `
+          <form action="/auth/register_process" method="post">
+            <p><input type="text" name="email" placeholder="email"></p>
+            <p><input type="password" name="password" placeholder="password"></p>
+            <p><input type="password" name="confirmPassword" placeholder="password"></p>
+            <p><input type="text" name="displayName" placeholder="display name"></p>
+            <p>
+              <input type="submit" value="register">
+            </p>
+          </form>
+        `,
+    "",
+  );
+  res.send(html);
+});
+
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     res.clearCookie("connect.sid");
