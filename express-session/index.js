@@ -9,6 +9,7 @@ const authRouter = require("./routes/auth");
 const helmet = require("helmet");
 const session = require("express-session");
 const FileStore = require("session-file-store")(session);
+const flash = require("connect-flash");
 app.use(helmet());
 
 app.use(express.static("public"));

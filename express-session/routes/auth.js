@@ -7,17 +7,43 @@ const template = require("../lib/template");
 
 const low = require("lowdb");
 const FileSync = require("lowdb/adapters/FileSync");
+const shortid = require("shortid");
+const flash = require("connect-flash");
 
 const adapter = new FileSync("db.json");
 const db = low(adapter);
 
-// 기본 구조 설정 (처음 한 번만)
 db.defaults({users: []}).write();
 
 const authData = {
   email: "test@test.com",
   password: "12341234",
   nickname: "test",
+};
+
+const registerHTML = (req, res, options = {}) => {
+  const {error = "", email = "", displayName = ""} = options;
+
+  const title = "WEB - Register";
+  const list = template.list(req.list);
+
+  const html = template.HTML(
+    title,
+    list,
+    `
+      ${error ? `<p style="color:red;">${error}</p>` : ""}
+      <form action="/auth/register_process" method="post">
+        <p><input type="text" name="email" placeholder="email" value="${email}"></p>
+        <p><input type="password" name="password" placeholder="password"></p>
+        <p><input type="password" name="confirmPassword" placeholder="confirmPassword"></p>
+        <p><input type="text" name="displayName" placeholder="display name" value="${displayName}"></p>
+        <p><input type="submit" value="register"></p>
+      </form>
+    `,
+    "",
+  );
+
+  res.send(html);
 };
 
 router.get("/login", (req, res) => {
@@ -53,31 +79,23 @@ router.post("/login_process", (req, res) => {
 });
 
 router.get("/register", (req, res) => {
-  const title = "WEB - Register";
-  const list = template.list(req.list);
-  const html = template.HTML(
-    title,
-    list,
-    `
-          <form action="/auth/register_process" method="post">
-            <p><input type="text" name="email" placeholder="email" value="test@test.com"></p>
-            <p><input type="password" name="password" placeholder="password" value="12341234"></p>
-            <p><input type="password" name="confirmPassword" placeholder="password" value="12341234"></p>
-            <p><input type="text" name="displayName" placeholder="display name" value="test"></p>
-            <p>
-              <input type="submit" value="register">
-            </p>
-          </form>
-        `,
-    "",
-  );
-  res.send(html);
+  registerHTML(req, res);
 });
 
 router.post("/register_process", async (req, res) => {
-  const {email, password, password2, displayName} = req.body;
+  const {email, password, confirmPassword, displayName} = req.body;
+
+  if (password !== confirmPassword) {
+    return registerHTML(req, res, {
+      error: "Password must same!!",
+      email,
+      displayName,
+    });
+  }
+
   db.get("users")
     .push({
+      id: shortid.generate(),
       email: email,
       password: password,
       displayName: displayName,
